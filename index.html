@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>AstraShe | Your Shield</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <div class="logo"><span>⚔️🛡️</span></div>
+    <h1 class="app-name">Astra<span style="color:#c71585;">She</span></h1>
+    
+    <div id="loggedOut">
+      <p class="tagline">"Empowering your safety, one step at a time."</p>
+      <button id="loginBtn">Login with Google</button>
+    </div>
+
+    <div id="loggedIn" style="display:none;">
+      <div class="score-badge">🛡️ Safety Score: <span id="currentScore">85</span></div>
+      
+      <p class="tagline-inner">"Shield Active. You are not alone."</p>
+      <div class="welcome">Welcome, <span id="currentName"></span></div>
+      
+      <div id="zoneIndicator" class="zone-banner safe">📍 Status: Zone Analysis Safe</div>
+
+      <div class="button-group">
+        <button id="sosBtn" class="btn-sos">🚨 ACTIVATE SOS</button>
+        <button id="alarmBtn" class="btn-alarm">🔔 TRIGGER LOUD ALARM</button>
+      </div>
+
+      <div class="button-group">
+        <button id="tagSafeBtn" class="btn-safe">✅ Tag Safe Place</button>
+        <button id="tagUnsafeBtn" class="btn-unsafe">❌ Tag Unsafe Place</button>
+      </div>
+
+      <div class="button-group">
+        <button id="fakeCallBtn" class="btn-secondary">📞 Fake Call</button>
+        <button id="contactsBtn">Manage Contacts</button>
+      </div>
+
+      <div class="button-group">
+        <button id="logoutBtn" class="btn-secondary">Logout</button>
+      </div>
+
+      <div class="resources-box">
+        <h4>Quick Resources</h4>
+        <div class="resource-links">
+          <a href="#" onclick="findNearby('police')">👮 Nearby Police</a>
+          <a href="#" onclick="findNearby('hospital')">🏥 Nearby Hospitals</a>
+          <a href="tel:112">📞 Call Emergency (112)</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="contactsModal" style="display:none;" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Emergency Contacts</h3>
+            <ul id="contactList"></ul>
+            <input type="text" id="cName" placeholder="Name">
+            <input type="tel" id="cPhone" placeholder="Phone">
+            <button onclick="addContact()">Add Contact</button>
+            <button onclick="toggleContacts()" class="btn-secondary">Close</button>
+        </div>
+    </div>
+
+    <div id="output">Ready...</div>
+  </div>
+
+  <button onclick="toggleRiskMode()" style="position:fixed; bottom:5px; right:5px; opacity:0.3;">Dev Toggle</button>
+
+  <div id="fakeCallScreen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, #2c3e50, #000000); z-index:9999; color:white; text-align:center; padding-top:80px; font-family: sans-serif;">
+    <div style="font-size: 24px; margin-bottom: 10px;">Mom</div>
+    <div style="font-size: 16px; opacity: 0.8; margin-bottom: 50px;">Mobile</div>
+    <div style="width: 120px; height: 120px; background: #555; border-radius: 50%; margin: 0 auto 100px; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
+    
+    <div style="display: flex; justify-content: space-around; width: 100%; position: absolute; bottom: 80px;">
+        <div onclick="stopFakeCall()" style="cursor:pointer;">
+            <div style="background: #ff3b30; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 10px;">📞</div>
+            <span>Decline</span>
+        </div>
+        <div onclick="stopFakeCall()" style="cursor:pointer;">
+            <div style="background: #4cd964; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 10px;">📞</div>
+            <span>Accept</span>
+        </div>
+    </div>
+</div>
+
+  <script>
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIfOup9uBncCUm85AD9eQfNX-7FZi4kJ8",
+      authDomain: "visionaries-bfe28.firebaseapp.com",
+      projectId: "visionaries-bfe28",
+      storageBucket: "visionaries-bfe28.firebasestorage.app",
+      messagingSenderId: "186328090218",
+      appId: "1:186328090218:web:aa39e8d25244a081722c13"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,106 @@
+body {
+    background-color: #fdf2f8;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.main-container {
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.app-name { font-size: 2rem; margin-bottom: 0.5rem; color: #333; }
+.tagline, .tagline-inner { color: #666; font-style: italic; margin-bottom: 1.5rem; }
+
+/* Score Badge */
+.score-badge {
+    background: #fdf2f8;
+    color: #c71585;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: inline-block;
+    border: 1px solid #f9a8d4;
+    margin-bottom: 10px;
+}
+
+/* Zone Banner */
+.zone-banner {
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+.safe { background: #dcfce7; color: #166534; }
+.unsafe { background: #fee2e2; color: #991b1b; }
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-sos { background: #e11d48; color: white; border: none; font-size: 1rem; }
+.btn-alarm { background: #f59e0b; color: white; border: none; }
+.btn-safe { background: #dcfce7; border-color: #86efac; }
+.btn-unsafe { background: #fee2e2; border-color: #fca5a5; }
+.btn-secondary { background: #f1f5f9; }
+
+.resources-box {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.resource-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resource-links a {
+    text-decoration: none;
+    color: #2563eb;
+    font-size: 0.9rem;
+}
+
+/* Modal for Contacts */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    width: 80%;
+}
+
+
+
