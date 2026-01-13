@@ -1,46 +1,32 @@
 const $ = id => document.getElementById(id);
 
-
-
 // --- Audio for Alarm & Fake Call ---
 const alarmAudio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
 const ringtone = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cell-phone-ringing-vibration-20.mp3');
 
 alarmAudio.loop = true;
+ringtone.loop = true;
+let isAlarmOn = false; // Declared at the top to avoid errors
 
-// Helper to "Unlock" audio on first click (Crucial for Mobile)
+function showOutput(msg) {
+    if ($('output')) $('output').innerText = msg;
+}
+
+// Helper to "Unlock" audio on first click (Crucial for Mobile/Chrome)
 const unlockAudio = () => {
     alarmAudio.play().then(() => {
         alarmAudio.pause();
         alarmAudio.currentTime = 0;
-    }).catch(e => console.log("Audio unlock waiting for user..."));
+    }).catch(e => console.log("Audio unlock waiting..."));
     
     ringtone.play().then(() => {
         ringtone.pause();
         ringtone.currentTime = 0;
-    }).catch(e => console.log("Audio unlock waiting for user..."));
+    }).catch(e => console.log("Audio unlock waiting..."));
     
-    // Remove listener after first click to save performance
     document.removeEventListener('click', unlockAudio);
 };
-
 document.addEventListener('click', unlockAudio);
-
-$('alarmBtn').onclick = () => {
-  if (!isAlarmOn) {
-    alarmAudio.play().catch(err => showOutput("Error: Click anywhere on page first!"));
-    $('alarmBtn').innerText = "🛑 STOP ALARM";
-    $('alarmBtn').style.background = "black";
-    showOutput("ALARM RINGING AT MAX VOLUME");
-    isAlarmOn = true;
-  } else {
-    alarmAudio.pause();
-    alarmAudio.currentTime = 0;
-    $('alarmBtn').innerText = "🔔 TRIGGER LOUD ALARM";
-    $('alarmBtn').style.background = "#ff69b4";
-    isAlarmOn = false;
-  }
-};
 
 // --- 1. Auth State Management ---
 firebase.auth().onAuthStateChanged(user => {
@@ -48,7 +34,8 @@ firebase.auth().onAuthStateChanged(user => {
     $('loggedIn').style.display = 'block';
     $('loggedOut').style.display = 'none';
     $('currentName').innerText = user.displayName;
-    checkZoneSafety(); // Check if current area is safe on login
+    checkZoneSafety(); 
+    loadContacts(user.uid);
   } else {
     $('loggedIn').style.display = 'none';
     $('loggedOut').style.display = 'block';
@@ -58,7 +45,7 @@ firebase.auth().onAuthStateChanged(user => {
 $('loginBtn').onclick = () => firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
 $('logoutBtn').onclick = () => firebase.auth().signOut();
 
-// --- 2. Smart SOS Logic (Manual & Shake Trigger) ---
+// --- 2. Smart SOS Logic ---
 const triggerSOS = async () => {
   showOutput("🚨 SOS ACTIVATED! Fetching location...");
   
@@ -67,9 +54,7 @@ const triggerSOS = async () => {
     const lng = pos.coords.longitude;
     const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
     const user = firebase.auth().currentUser;
-
       
-    // Record in Firestore
     await db.collection('alerts').add({
       uid: user.uid,
       userName: user.displayName,
@@ -77,89 +62,66 @@ const triggerSOS = async () => {
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Send WhatsApp to Primary Contact
     const userDoc = await db.collection('users').doc(user.uid).get();
     const contacts = userDoc.exists ? (userDoc.data().contacts || []) : [];
 
     if (contacts.length > 0) {
       const primaryContact = contacts[0].phone;
-      const msg = encodeURIComponent(`🚨 EMERGENCY! AstraShe Alert from ${user.displayName}. I need help! My live location: ${mapLink}`);
+      const msg = encodeURIComponent(`🚨 EMERGENCY! AstraShe Alert from ${user.displayName}. I need help! My location: ${mapLink}`);
       window.open(`https://wa.me/${primaryContact}?text=${msg}`, '_blank');
-      showOutput("SOS Sent! Audio/Location Logged.");
+      showOutput("SOS Sent to Primary Contact!");
     } else {
-      showOutput("SOS Logged! No contacts found to message.");
+      showOutput("SOS Logged! Add contacts for WhatsApp alerts.");
     }
   }, err => showOutput("Location Error: " + err.message));
 };
 
 $('sosBtn').onclick = triggerSOS;
 
-// --- 3. Shake Detection (Smart SOS Feature) ---
+// --- 3. Shake Detection ---
 let lastShake = 0;
 window.addEventListener('devicemotion', (event) => {
     let acc = event.accelerationIncludingGravity;
+    if(!acc) return;
     let totalAcc = Math.abs(acc.x) + Math.abs(acc.y);
-    
-    if (totalAcc > 25) { // Sensitivity threshold
+    if (totalAcc > 25) {
         let now = Date.now();
-        if (now - lastShake > 5000) { // Prevent double-triggering
+        if (now - lastShake > 5000) {
             lastShake = now;
             triggerSOS();
         }
     }
 });
 
-// --- 4. Fake Call Simulator (Robust Version) ---
-// --- 4. Fake Call Simulator (Final Bulletproof Version) ---
-const ringtone = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cell-phone-ringing-vibration-20.mp3');
-ringtone.loop = true;
-
+// --- 4. Fake Call Simulator ---
 $('fakeCallBtn').onclick = () => {
     showOutput("📞 Fake call starting in 5 seconds...");
-    
     setTimeout(() => {
-        // 1. Show the fake call screen
         $('fakeCallScreen').style.display = 'block';
-        
-        // 2. Play the sound
-        ringtone.play().catch(e => {
-            console.log("Sound blocked, but screen is showing.");
-            showOutput("Call incoming (Sound blocked by browser)");
-        });
-        
-        showOutput("Incoming Call...");
+        ringtone.play().catch(e => console.log("Sound blocked"));
     }, 5000);
 };
 
-// Function to stop the call (linked to the buttons in HTML)
-function stopFakeCall() {
+window.stopFakeCall = function() {
     $('fakeCallScreen').style.display = 'none';
     ringtone.pause();
     ringtone.currentTime = 0;
     showOutput("Call ended.");
 }
-// --- 5. Unsafe Zone Awareness (AI-Lite) ---
+
+// --- 5. Unsafe Zone Awareness ---
 async function checkZoneSafety() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const indicator = $('zoneIndicator');
-        // Logic: Check Firestore 'places' to see if anyone tagged this area 'unsafe'
         const unsafePlaces = await db.collection('places').where('type', '==', 'unsafe').get();
-        
         let nearUnsafe = false;
         unsafePlaces.forEach(doc => {
             let data = doc.data();
-            // Basic proximity check (Roughly 500 meters)
             let dist = Math.abs(data.lat - pos.coords.latitude) + Math.abs(data.lng - pos.coords.longitude);
             if (dist < 0.005) nearUnsafe = true;
         });
-
-        if (nearUnsafe) {
-            indicator.className = "zone-banner unsafe";
-            indicator.innerText = "⚠️ Warning: You are near a reported unsafe zone.";
-        } else {
-            indicator.className = "zone-banner safe";
-            indicator.innerText = "📍 Status: Zone Analysis Safe";
-        }
+        indicator.className = nearUnsafe ? "zone-banner unsafe" : "zone-banner safe";
+        indicator.innerText = nearUnsafe ? "⚠️ Warning: Near unsafe zone." : "📍 Status: Zone Analysis Safe";
     });
 }
 
@@ -176,21 +138,19 @@ async function handleTag(type) {
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
     showOutput(`Successfully marked as ${type.toUpperCase()}.`);
-    checkZoneSafety(); // Refresh banner
+    checkZoneSafety();
   });
 }
-
 $('tagSafeBtn').onclick = () => handleTag('safe');
 $('tagUnsafeBtn').onclick = () => handleTag('unsafe');
 
 // --- 7. Alarm Feature ---
-let isAlarmOn = false;
 $('alarmBtn').onclick = () => {
   if (!isAlarmOn) {
-    alarmAudio.play();
+    alarmAudio.play().catch(() => showOutput("Click screen first!"));
     $('alarmBtn').innerText = "🛑 STOP ALARM";
     $('alarmBtn').style.background = "black";
-    showOutput("ALARM RINGING AT MAX VOLUME");
+    showOutput("ALARM RINGING");
     isAlarmOn = true;
   } else {
     alarmAudio.pause();
@@ -200,25 +160,49 @@ $('alarmBtn').onclick = () => {
   }
 };
 
-// --- 8. Manage Contacts ---
-$('contactsBtn').onclick = async () => {
-  const name = prompt("Contact Name:");
-  const phone = prompt("WhatsApp Number (Include Country Code, e.g., 919876543210):");
-  if (name && phone) {
-    const user = firebase.auth().currentUser;
-    await db.collection('users').doc(user.uid).set({
-      contacts: firebase.firestore.FieldValue.arrayUnion({ name, phone })
-    }, { merge: true });
-    showOutput("Contact added successfully.");
-  }
-};
+// --- 8. Contact Management ---
+window.toggleContacts = () => {
+    const modal = $('contactsModal');
+    modal.style.display = (modal.style.display === 'none') ? 'flex' : 'none';
+}
+$('contactsBtn').onclick = toggleContacts;
 
-// Function for Nearby Resources
-function findNearby(type) {
-    window.open(`https://www.google.com/maps/search/${type}+near+me`, '_blank');
+window.addContact = async () => {
+    const name = $('cName').value;
+    const phone = $('cPhone').value;
+    const user = firebase.auth().currentUser;
+    if (name && phone) {
+        await db.collection('users').doc(user.uid).set({
+            contacts: firebase.firestore.FieldValue.arrayUnion({ name, phone })
+        }, { merge: true });
+        $('cName').value = "";
+        $('cPhone').value = "";
+        loadContacts(user.uid);
+        showOutput("Contact added!");
+    }
 }
 
+function loadContacts(uid) {
+    db.collection('users').doc(uid).get().then(doc => {
+        const list = $('contactList');
+        list.innerHTML = "";
+        if (doc.exists && doc.data().contacts) {
+            doc.data().contacts.forEach(c => {
+                list.innerHTML += `<li>${c.name}: ${c.phone}</li>`;
+            });
+        }
+    });
+}
 
+// --- 9. Utility Functions ---
 window.findNearby = (type) => {
     window.open(`https://www.google.com/maps/search/${type}+near+me`, '_blank');
 };
+
+window.toggleRiskMode = () => {
+    const indicator = $('zoneIndicator');
+    indicator.classList.toggle('safe');
+    indicator.classList.toggle('unsafe');
+    indicator.innerText = indicator.classList.contains('unsafe') ? "⚠️ Risk Mode Active" : "📍 Status: Zone Analysis Safe";
+}
+
