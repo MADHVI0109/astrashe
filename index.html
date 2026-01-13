@@ -21,10 +21,8 @@
 
     <div id="loggedIn" style="display:none;">
       <div class="score-badge">🛡️ Safety Score: <span id="currentScore">85</span></div>
-      
       <p class="tagline-inner">"Shield Active. You are not alone."</p>
       <div class="welcome">Welcome, <span id="currentName"></span></div>
-      
       <div id="zoneIndicator" class="zone-banner safe">📍 Status: Zone Analysis Safe</div>
 
       <div class="button-group">
@@ -49,8 +47,8 @@
       <div class="resources-box">
         <h4>Quick Resources</h4>
         <div class="resource-links">
-          <a href="#" onclick="findNearby('police')">👮 Nearby Police</a>
-          <a href="#" onclick="findNearby('hospital')">🏥 Nearby Hospitals</a>
+          <a href="#" onclick="window.findNearby('police')">👮 Nearby Police</a>
+          <a href="#" onclick="window.findNearby('hospital')">🏥 Nearby Hospitals</a>
           <a href="tel:112">📞 Call Emergency (112)</a>
         </div>
       </div>
@@ -62,15 +60,15 @@
             <ul id="contactList"></ul>
             <input type="text" id="cName" placeholder="Name">
             <input type="tel" id="cPhone" placeholder="Phone">
-            <button onclick="addContact()">Add Contact</button>
-            <button onclick="toggleContacts()" class="btn-secondary">Close</button>
+            <button onclick="window.addContact()">Add Contact</button>
+            <button onclick="window.toggleContacts()" class="btn-secondary">Close</button>
         </div>
     </div>
 
     <div id="output">Ready...</div>
   </div>
 
-  <button onclick="toggleRiskMode()" style="position:fixed; bottom:5px; right:5px; opacity:0.3;">Dev Toggle</button>
+  <button onclick="window.toggleRiskMode()" style="position:fixed; bottom:5px; right:5px; opacity:0.3;">Dev Toggle</button>
 
   <div id="fakeCallScreen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, #2c3e50, #000000); z-index:9999; color:white; text-align:center; padding-top:80px; font-family: sans-serif;">
     <div style="font-size: 24px; margin-bottom: 10px;">Mom</div>
@@ -78,11 +76,11 @@
     <div style="width: 120px; height: 120px; background: #555; border-radius: 50%; margin: 0 auto 100px; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
     
     <div style="display: flex; justify-content: space-around; width: 100%; position: absolute; bottom: 80px;">
-        <div onclick="stopFakeCall()" style="cursor:pointer;">
+        <div onclick="window.stopFakeCall()" style="cursor:pointer;">
             <div style="background: #ff3b30; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 10px;">📞</div>
             <span>Decline</span>
         </div>
-        <div onclick="stopFakeCall()" style="cursor:pointer;">
+        <div onclick="window.stopFakeCall()" style="cursor:pointer;">
             <div style="background: #4cd964; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 10px;">📞</div>
             <span>Accept</span>
         </div>
@@ -90,25 +88,17 @@
 </div>
 
   <script>
-    
-  const firebaseConfig = {
-  apiKey: "AIzaSyAJrCQAnE3B8TzNHLtFTzlULOSKXRG3kkA",
-  authDomain: "visioneries-cb5d1.firebaseapp.com",
-  projectId: "visioneries-cb5d1",
-  storageBucket: "visioneries-cb5d1.firebasestorage.app",
-  messagingSenderId: "818070185832",
-  appId: "1:818070185832:web:27e93f506bfdef431b18dd"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJrCQAnE3B8TzNHLtFTzlULOSKXRG3kkA",
+      authDomain: "visioneries-cb5d1.firebaseapp.com",
+      projectId: "visioneries-cb5d1",
+      storageBucket: "visioneries-cb5d1.firebasestorage.app",
+      messagingSenderId: "818070185832",
+      appId: "1:818070185832:web:27e93f506bfdef431b18dd"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
   </script>
   <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
